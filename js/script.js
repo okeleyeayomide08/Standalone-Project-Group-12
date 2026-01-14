@@ -4,6 +4,7 @@
 const body = document.body;
 const searchInput = document.getElementById("city");
 const searchBtn = document.getElementById("search");
+const statusMessage = document.getElementById("status-message");
 
 // Main weather
 const cityName = document.getElementById("city-name");
@@ -28,36 +29,7 @@ const API_KEY = "147437c80d2510a08584ba9606801aef";
 const API_URL = "https://api.openweathermap.org/data/2.5/";
 
 // =========================
-// ICON MAPPING
-// =========================
-function getIconName(main) {
-  switch (main) {
-    case "Clear":
-      return "clear";
-    case "Clouds":
-      return "clouds";
-    case "Rain":
-    case "Drizzle":
-      return "rain";
-    case "Thunderstorm":
-      return "thunderstorm";
-    case "Snow":
-      return "snow";
-    case "Mist":
-    case "Fog":
-    case "Haze":
-    case "Smoke":
-    case "Dust":
-    case "Sand":
-    case "Ash":
-      return "fog";
-    default:
-      return "clouds";
-  }
-}
-
-// =========================
-// THEME LOGIC
+// THEME + ICON LOGIC
 // =========================
 function getWeatherTheme(main) {
   switch (main) {
@@ -85,6 +57,32 @@ function getWeatherTheme(main) {
   }
 }
 
+function getIconName(main) {
+  switch (main) {
+    case "Clear":
+      return "clear";
+    case "Clouds":
+      return "clouds";
+    case "Rain":
+    case "Drizzle":
+      return "rain";
+    case "Thunderstorm":
+      return "thunderstorm";
+    case "Snow":
+      return "snow";
+    case "Mist":
+    case "Fog":
+    case "Haze":
+    case "Smoke":
+    case "Dust":
+    case "Sand":
+    case "Ash":
+      return "fog";
+    default:
+      return "clouds";
+  }
+}
+
 function applyTheme(theme) {
   body.className = "";
   body.classList.add(`weather-${theme}`);
@@ -102,8 +100,15 @@ function formatDate(unix) {
     weekday: "long",
     month: "short",
     day: "numeric",
-    year: "numeric",
   });
+}
+
+function showMessage(msg) {
+  statusMessage.textContent = msg;
+}
+
+function clearMessage() {
+  statusMessage.textContent = "";
 }
 
 function clearMainWeather() {
@@ -131,26 +136,27 @@ function renderMainWeather(data) {
   dateEl.textContent = formatDate(data.dt);
   tempEl.textContent = `${kelvinToCelsius(data.main.temp)}°`;
 
-  weatherIcon.src = `assets/images/icon/${getIconName(weather.main)}.webp`;
+  const iconName = getIconName(weather.main);
+  weatherIcon.src = `assets/images/icon/${iconName}.webp`;
   weatherIcon.alt = weather.main;
   weatherIcon.hidden = false;
 
   feelsEl.textContent = `${kelvinToCelsius(data.main.feels_like)}°`;
   humidityEl.textContent = `${data.main.humidity}%`;
   windEl.textContent = `${data.wind.speed} km/hr`;
-  precipitationEl.textContent =
-    data.rain && data.rain["1h"] ? `${data.rain["1h"]} mm` : "0 mm";
+  precipitationEl.textContent = data.rain?.["1h"]
+    ? `${data.rain["1h"]} mm`
+    : "0 mm";
 
   applyTheme(getWeatherTheme(weather.main));
 }
 
 // =========================
-// RENDER WEEKLY FORECAST
+// RENDER DAILY FORECAST
 // =========================
 function renderWeeklyForecast(data) {
   clearDailyForecast();
 
-  // OpenWeather 5-day forecast has 3-hour intervals
   const dailyMap = {};
 
   data.list.forEach((item) => {
@@ -170,7 +176,6 @@ function renderWeeklyForecast(data) {
       const icon = clone.querySelector(".icon");
       icon.src = `assets/images/icon/${getIconName(day.weather[0].main)}.webp`;
       icon.hidden = false;
-      icon.alt = day.weather[0].main;
 
       clone.querySelector(".temp").textContent = `${kelvinToCelsius(
         day.main.temp
@@ -195,41 +200,41 @@ async function fetchWeeklyForecast(lat, lon) {
 
 async function fetchWeatherByCity(city) {
   body.dataset.state = "loading";
+  clearMessage();
+
   try {
     const res = await fetch(`${API_URL}weather?q=${city}&appid=${API_KEY}`);
-
-    if (!res.ok) throw new Error("City not found");
+    if (!res.ok) throw new Error();
 
     const data = await res.json();
     renderMainWeather(data);
-
     await fetchWeeklyForecast(data.coord.lat, data.coord.lon);
+
     body.dataset.state = "ready";
-  } catch (err) {
-    console.error(err);
+  } catch {
     body.dataset.state = "idle";
-    alert("City not found.");
+    clearMainWeather();
+    clearDailyForecast();
+    showMessage("City not found. Please try again.");
   }
 }
 
+// =========================
+// LOCATION WEATHER
+// =========================
 function getLocationWeather() {
   if (!navigator.geolocation) return;
 
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      const { latitude, longitude } = pos.coords;
-      const res = await fetch(
-        `${API_URL}weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
-      );
-      const data = await res.json();
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+    const res = await fetch(
+      `${API_URL}weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
+    );
+    const data = await res.json();
 
-      renderMainWeather(data);
-      fetchWeeklyForecast(latitude, longitude);
-    },
-    () => {
-      // user denied location — stay idle
-    }
-  );
+    renderMainWeather(data);
+    fetchWeeklyForecast(latitude, longitude);
+  });
 }
 
 // =========================
@@ -239,6 +244,7 @@ searchBtn.addEventListener("click", () => {
   const city = searchInput.value.trim();
   if (!city) return;
 
+  clearMessage();
   clearMainWeather();
   clearDailyForecast();
   fetchWeatherByCity(city);
@@ -254,5 +260,6 @@ searchInput.addEventListener("keypress", (e) => {
 window.addEventListener("load", () => {
   clearMainWeather();
   clearDailyForecast();
+  clearMessage();
   getLocationWeather();
 });

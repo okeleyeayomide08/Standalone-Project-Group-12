@@ -74,6 +74,32 @@ header h1{
   color: var(--bg-card);
   cursor: pointer;
 }
+.status-message {
+  margin-top: 1rem;
+  font-family: DMSans-Medium;
+  font-size: 1.3rem;
+  color: var(--heading-color); 
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Visible state */
+.status-message:not(:empty) {
+  opacity: 1;
+  transform: translateY(0);
+  animation: shake 0.35s ease;
+}
+
+/* Shake animation */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
 
 .details{
   display: flex;
