@@ -112,7 +112,7 @@ function clearDailyForecast() {
 }
 
 // =========================
-// INPUT VALIDATION (FIXED)
+// INPUT VALIDATION
 // =========================
 function isValidQuery(input) {
   return /^[a-zA-Z\s,]{3,}$/.test(input.trim());
@@ -121,10 +121,10 @@ function isValidQuery(input) {
 function normalizeQuery(input) {
   return input
     .toLowerCase()
-    .replace(/[^a-z\s,]/g, "") // remove ;;; !!! 123
+    .replace(/[^a-z\s,]/g, "")
     .replace(/\s+/g, " ")
     .trim()
-    .replace(" ", ","); // ikeja lagos → ikeja,lagos
+    .replace(" ", ","); // ikeja lagos -> ikeja,lagos
 }
 
 // =========================
@@ -171,14 +171,13 @@ function renderWeeklyForecast(data) {
         day.dt * 1000
       ).toLocaleDateString("en-US", { weekday: "short" });
 
-      clone.querySelector(".icon").src = `assets/images/icon/${getIconName(
-        day.weather[0].main
-      )}.webp`;
+      const icon = clone.querySelector(".icon");
+      icon.src = `assets/images/icon/${getIconName(day.weather[0].main)}.webp`;
+      icon.hidden = false;
 
       clone.querySelector(".temp").textContent = `${kelvinToCelsius(
         day.main.temp
       )}°`;
-
       clone.querySelector(".wind").textContent = `${day.wind.speed} km/hr`;
 
       dailyContainer.appendChild(clone);
@@ -186,7 +185,7 @@ function renderWeeklyForecast(data) {
 }
 
 // =========================
-// FETCH WEATHER (STRICT + ACCURATE)
+// FETCH WEATHER BY CITY
 // =========================
 async function fetchWeatherByCity(input) {
   clearMessage();
@@ -210,17 +209,12 @@ async function fetchWeatherByCity(input) {
 
     if (!geoData.length) throw new Error();
 
-    // STRICT city-name matching
-    let location = geoData.find((loc) => loc.name.toLowerCase() === typedCity);
+    // STRICT match with typed city
+    let location = geoData.find(
+      (loc) => loc.name.toLowerCase() === typedCity && loc.country === "NG"
+    );
 
-    // Prefer Nigeria if multiple matches
-    if (!location) {
-      location = geoData.find(
-        (loc) => loc.name.toLowerCase() === typedCity && loc.country === "NG"
-      );
-    }
-
-    if (!location) throw new Error();
+    if (!location) location = geoData[0]; // fallback to first result
 
     const { lat, lon, name, state, country } = location;
     const label = state
@@ -254,12 +248,33 @@ async function fetchWeeklyForecast(lat, lon) {
 }
 
 // =========================
+// CURRENT LOCATION WEATHER
+// =========================
+function getLocationWeather() {
+  if (!navigator.geolocation) return;
+
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+
+    try {
+      const res = await fetch(
+        `${API_URL}weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
+      );
+      const data = await res.json();
+      renderMainWeather(data, `${data.name}, ${data.sys.country}`);
+      await fetchWeeklyForecast(latitude, longitude);
+    } catch {
+      showMessage("Unable to fetch your location weather");
+    }
+  });
+}
+
+// =========================
 // EVENTS
 // =========================
-searchBtn.addEventListener("click", () => {
-  fetchWeatherByCity(searchInput.value);
-});
-
+searchBtn.addEventListener("click", () =>
+  fetchWeatherByCity(searchInput.value)
+);
 searchInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") searchBtn.click();
 });
@@ -271,4 +286,5 @@ window.addEventListener("load", () => {
   clearMainWeather();
   clearDailyForecast();
   clearMessage();
+  getLocationWeather();
 });
