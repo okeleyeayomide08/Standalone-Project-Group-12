@@ -27,6 +27,7 @@ const dailyTemplate = document.getElementById("daily-template");
 // =========================
 const API_KEY = "147437c80d2510a08584ba9606801aef";
 const API_URL = "https://api.openweathermap.org/data/2.5/";
+const GEO_URL = "https://api.openweathermap.org/geo/1.0/direct";
 
 // =========================
 // THEME + ICON LOGIC
@@ -44,16 +45,8 @@ function getWeatherTheme(main) {
       return "stormy";
     case "Snow":
       return "snowy";
-    case "Mist":
-    case "Fog":
-    case "Haze":
-    case "Smoke":
-    case "Dust":
-    case "Sand":
-    case "Ash":
-      return "foggy";
     default:
-      return "cloudy";
+      return "foggy";
   }
 }
 
@@ -70,16 +63,8 @@ function getIconName(main) {
       return "thunderstorm";
     case "Snow":
       return "snow";
-    case "Mist":
-    case "Fog":
-    case "Haze":
-    case "Smoke":
-    case "Dust":
-    case "Sand":
-    case "Ash":
-      return "fog";
     default:
-      return "clouds";
+      return "fog";
   }
 }
 
@@ -127,18 +112,32 @@ function clearDailyForecast() {
 }
 
 // =========================
+// INPUT VALIDATION (FIXED)
+// =========================
+function isValidQuery(input) {
+  return /^[a-zA-Z\s,]{3,}$/.test(input.trim());
+}
+
+function normalizeQuery(input) {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z\s,]/g, "") // remove ;;; !!! 123
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(" ", ","); // ikeja lagos → ikeja,lagos
+}
+
+// =========================
 // RENDER MAIN WEATHER
 // =========================
-function renderMainWeather(data) {
+function renderMainWeather(data, locationLabel) {
   const weather = data.weather[0];
 
-  cityName.textContent = `${data.name}, ${data.sys.country}`;
+  cityName.textContent = locationLabel;
   dateEl.textContent = formatDate(data.dt);
   tempEl.textContent = `${kelvinToCelsius(data.main.temp)}°`;
 
-  const iconName = getIconName(weather.main);
-  weatherIcon.src = `assets/images/icon/${iconName}.webp`;
-  weatherIcon.alt = weather.main;
+  weatherIcon.src = `assets/images/icon/${getIconName(weather.main)}.webp`;
   weatherIcon.hidden = false;
 
   feelsEl.textContent = `${kelvinToCelsius(data.main.feels_like)}°`;
@@ -158,7 +157,6 @@ function renderWeeklyForecast(data) {
   clearDailyForecast();
 
   const dailyMap = {};
-
   data.list.forEach((item) => {
     const day = new Date(item.dt * 1000).toDateString();
     if (!dailyMap[day]) dailyMap[day] = item;
@@ -173,9 +171,9 @@ function renderWeeklyForecast(data) {
         day.dt * 1000
       ).toLocaleDateString("en-US", { weekday: "short" });
 
-      const icon = clone.querySelector(".icon");
-      icon.src = `assets/images/icon/${getIconName(day.weather[0].main)}.webp`;
-      icon.hidden = false;
+      clone.querySelector(".icon").src = `assets/images/icon/${getIconName(
+        day.weather[0].main
+      )}.webp`;
 
       clone.querySelector(".temp").textContent = `${kelvinToCelsius(
         day.main.temp
@@ -188,7 +186,64 @@ function renderWeeklyForecast(data) {
 }
 
 // =========================
-// FETCH WEATHER
+// FETCH WEATHER (STRICT + ACCURATE)
+// =========================
+async function fetchWeatherByCity(input) {
+  clearMessage();
+  clearMainWeather();
+  clearDailyForecast();
+
+  if (!isValidQuery(input)) {
+    showMessage("City not found");
+    return;
+  }
+
+  body.dataset.state = "loading";
+  const query = normalizeQuery(input);
+  const typedCity = query.split(",")[0];
+
+  try {
+    const geoRes = await fetch(
+      `${GEO_URL}?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`
+    );
+    const geoData = await geoRes.json();
+
+    if (!geoData.length) throw new Error();
+
+    // STRICT city-name matching
+    let location = geoData.find((loc) => loc.name.toLowerCase() === typedCity);
+
+    // Prefer Nigeria if multiple matches
+    if (!location) {
+      location = geoData.find(
+        (loc) => loc.name.toLowerCase() === typedCity && loc.country === "NG"
+      );
+    }
+
+    if (!location) throw new Error();
+
+    const { lat, lon, name, state, country } = location;
+    const label = state
+      ? `${name}, ${state}, ${country}`
+      : `${name}, ${country}`;
+
+    const weatherRes = await fetch(
+      `${API_URL}weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`
+    );
+    const weatherData = await weatherRes.json();
+
+    renderMainWeather(weatherData, label);
+    await fetchWeeklyForecast(lat, lon);
+
+    body.dataset.state = "ready";
+  } catch {
+    body.dataset.state = "idle";
+    showMessage("City not found");
+  }
+}
+
+// =========================
+// WEEKLY FORECAST
 // =========================
 async function fetchWeeklyForecast(lat, lon) {
   const res = await fetch(
@@ -198,56 +253,11 @@ async function fetchWeeklyForecast(lat, lon) {
   renderWeeklyForecast(data);
 }
 
-async function fetchWeatherByCity(city) {
-  body.dataset.state = "loading";
-  clearMessage();
-
-  try {
-    const res = await fetch(`${API_URL}weather?q=${city}&appid=${API_KEY}`);
-    if (!res.ok) throw new Error();
-
-    const data = await res.json();
-    renderMainWeather(data);
-    await fetchWeeklyForecast(data.coord.lat, data.coord.lon);
-
-    body.dataset.state = "ready";
-  } catch {
-    body.dataset.state = "idle";
-    clearMainWeather();
-    clearDailyForecast();
-    showMessage("City not found. Please try again.");
-  }
-}
-
-// =========================
-// LOCATION WEATHER
-// =========================
-function getLocationWeather() {
-  if (!navigator.geolocation) return;
-
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    const { latitude, longitude } = pos.coords;
-    const res = await fetch(
-      `${API_URL}weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
-    );
-    const data = await res.json();
-
-    renderMainWeather(data);
-    fetchWeeklyForecast(latitude, longitude);
-  });
-}
-
 // =========================
 // EVENTS
 // =========================
 searchBtn.addEventListener("click", () => {
-  const city = searchInput.value.trim();
-  if (!city) return;
-
-  clearMessage();
-  clearMainWeather();
-  clearDailyForecast();
-  fetchWeatherByCity(city);
+  fetchWeatherByCity(searchInput.value);
 });
 
 searchInput.addEventListener("keypress", (e) => {
@@ -261,5 +271,4 @@ window.addEventListener("load", () => {
   clearMainWeather();
   clearDailyForecast();
   clearMessage();
-  getLocationWeather();
 });
