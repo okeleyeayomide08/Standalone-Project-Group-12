@@ -1,17 +1,17 @@
 @import url(fonts.css);
 @import url(theme.css);
 
-* {
+*{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html {
-  font-size: 66.6%;
+html{
+  font-size: 66.6%
 }
 
-body {
+body{
   padding: 1rem 2rem;
   font-size: 1.5rem;
   background-color: var(--bg-main);
@@ -24,42 +24,42 @@ p:empty {
   display: none;
 }
 
-body,
-.details--main,
-.details--sub,
-.details--daily,
+body, 
+.details--main, 
+.details--sub, 
+.details--daily, 
 .daily-box div {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-header h1 {
+header h1{
   font-family: BricolageGrotesque-Bold;
   color: var(--heading-color);
 }
 
-.intro {
+.intro{
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 1.5rem;
 }
-.intro .intro--text {
+.intro .intro--text{
   font-size: 2.5rem;
   font-family: BricolageGrotesque-Bold;
   color: var(--heading-color);
 }
-.intro .intro--search {
+.intro .intro--search{
   margin-top: 2rem;
   position: relative;
 }
-.intro .intro--search input {
+.intro .intro--search input{
   width: 30rem;
   height: 2rem;
   padding: 1.5rem;
   font-family: DMSans-SemiBold;
   font-size: 1.3rem;
-  border: 0.15rem solid var(--heading-color);
-  border-radius: 0.5rem;
+  border: .15rem solid var(--heading-color);
+  border-radius: .5rem;
   color: var(--heading-color);
   background-color: var(--bg-card);
   cursor: pointer;
@@ -72,9 +72,9 @@ header h1 {
   left: 0;
   width: 30rem;
   background-color: var(--bg-card);
-  border: 0.15rem solid var(--heading-color);
+  border: .15rem solid var(--heading-color);
   border-top: none;
-  border-radius: 0 0 0.5rem 0.5rem;
+  border-radius: 0 0 .5rem .5rem;
   max-height: 20rem;
   overflow-y: auto;
   z-index: 1000;
@@ -93,7 +93,7 @@ header h1 {
   color: var(--heading-color);
   font-family: DMSans-Regular;
   font-size: 1.2rem;
-  border-bottom: 0.05rem solid var(--heading-color);
+  border-bottom: .05rem solid var(--heading-color);
   transition: background-color 0.2s ease;
 }
 
@@ -106,10 +106,10 @@ header h1 {
   background-color: var(--heading-color);
   color: var(--bg-card);
 }
-.intro .intro--search button {
+.intro .intro--search button{
   outline: none;
-  border: 0.15rem solid var(--heading-color);
-  border-radius: 0.5rem;
+  border: .15rem solid var(--heading-color);
+  border-radius: .5rem;
   background-color: var(--heading-color);
   padding: 0.6rem 1rem;
   font-size: 1.3rem;
@@ -117,7 +117,7 @@ header h1 {
   color: var(--bg-card);
   cursor: pointer;
 }
-.intro .intro--search button:hover {
+.intro .intro--search button:hover{
   background-color: var(--bg-card);
   color: var(--heading-color);
   transition: all 0.3s linear;
@@ -126,7 +126,7 @@ header h1 {
   margin-top: 1rem;
   font-family: DMSans-Medium;
   font-size: 1.3rem;
-  color: var(--heading-color);
+  color: var(--heading-color); 
   opacity: 0;
   transform: translateY(-5px);
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -141,30 +141,21 @@ header h1 {
 
 /* Shake animation */
 @keyframes shake {
-  0% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-4px);
-  }
-  50% {
-    transform: translateX(4px);
-  }
-  75% {
-    transform: translateX(-3px);
-  }
-  100% {
-    transform: translateX(0);
-  }
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
 }
 
-.details {
+
+.details{
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.details .details--main {
+.details .details--main{
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -175,36 +166,37 @@ header h1 {
   border-radius: 1.5rem;
   padding: 2rem;
 }
-.details .details--main .main-city {
+.details .details--main .main-city{
   font-family: DMSans-Bold;
   font-size: 2.2rem;
   color: var(--heading-color);
 }
-.details .details--main .main-date {
+.details .details--main .main-date{
   font-family: DMSans-Medium;
   margin-top: 0.75rem;
   color: var(--text-main);
 }
-.details .details--main div:nth-child(2) {
+.details .details--main div:nth-child(2){
   display: flex;
   align-items: center;
   gap: 2rem;
 }
-.details .details--main div:nth-child(2) img {
+.details .details--main div:nth-child(2) img{
   height: 8rem;
   width: 8rem;
 }
-.details .details--main div:nth-child(2) .temp {
+.details .details--main div:nth-child(2) .temp{
   font-family: DMSans-SemiBoldItalic;
   font-size: 7rem;
   color: var(--heading-color);
 }
 
-.details .details--sub {
+.details .details--sub{
   width: 100rem;
   display: flex;
   justify-content: space-around;
   margin-top: 2rem;
+
 }
 .details .details--sub div {
   display: flex;
@@ -216,33 +208,33 @@ header h1 {
   border-radius: 1rem;
   padding: 1rem;
 }
-.details .details--sub div .sub-text {
+.details .details--sub div .sub-text{
   font-family: DMSans-Medium;
   color: var(--text-main);
 }
-.details .details--sub p:nth-child(2) {
+.details .details--sub p:nth-child(2){
   font-family: DMSans-Medium;
   font-size: 2.5rem;
   color: var(--text-main);
 }
 
-.details .details--daily {
+.details .details--daily{
   width: 100rem;
   margin: 2rem 0;
 }
-.details .details--daily .daily-text {
+.details .details--daily .daily-text{
   font-family: DMSans-Medium;
   font-size: 2rem;
   color: var(--heading-color);
 }
-.details .details--daily .daily-box {
+.details .details--daily .daily-box{
   display: flex;
   width: 100rem;
   gap: 1rem;
   justify-content: space-between;
   margin-top: 2rem;
 }
-.details .details--daily .daily-box div {
+.details .details--daily .daily-box div{
   background-color: var(--bg-card);
   padding: 1rem;
   border-radius: 0.5rem;
@@ -250,118 +242,103 @@ header h1 {
   flex-direction: column;
   align-items: center;
 }
-.details .details--daily .daily-box .daily-day {
+.details .details--daily .daily-box .daily-day{
   font-family: DMSans-Bold;
   color: var(--heading-color);
 }
-.details .details--daily .daily-box img {
+.details .details--daily .daily-box img{
   width: 10rem;
 }
-.details .details--daily .daily-box .daily-info {
+.details .details--daily .daily-box .daily-info{
   display: flex;
   flex-direction: row;
   gap: 2rem;
   justify-content: space-between;
 }
-.details .details--daily .daily-box .daily-info p {
+.details .details--daily .daily-box .daily-info p{
   font-family: DMSans-Medium;
   font-size: 1.3rem;
   color: var(--text-main);
 }
 
-@media (max-width: 1024px) {
-  .details .details--main,
-  .details .details--sub,
-  .details .details--daily,
-  .details .details--daily .daily-box {
+@media (max-width:1024px) {
+  .details .details--main,.details .details--sub,.details .details--daily, .details .details--daily .daily-box{
     width: 90rem;
   }
 }
 
-@media (max-width: 768px) {
-  .details .details--main,
-  .details .details--sub,
-  .details .details--daily,
-  .details .details--daily .daily-box {
+@media (max-width:768px) {
+  .details .details--main,.details .details--sub,.details .details--daily,.details .details--daily .daily-box{
     width: 70rem;
   }
-  .details .details--sub div {
+  .details .details--sub div{
     width: 15rem;
   }
-  .details .details--daily .daily-box {
+  .details .details--daily .daily-box{
     flex-wrap: wrap;
   }
 }
 
-@media (max-width: 425px) {
-  .intro .intro--text {
+@media (max-width:425px) {
+  .intro .intro--text{
     font-size: 2rem;
   }
-  .intro .intro--search input {
+  .intro .intro--search input{
     width: 20rem;
   }
-  .details .details--main .main-city {
+  .details .details--main .main-city{
     font-size: 1.9rem;
   }
-  .details .details--main div:nth-child(2) .temp {
+  .details .details--main div:nth-child(2) .temp{
     font-size: 4rem;
   }
-  .details .details--main,
-  .details .details--sub,
-  .details .details--daily,
-  .details .details--daily .daily-box {
+  .details .details--main,.details .details--sub,.details .details--daily,.details .details--daily .daily-box{
     width: 35rem;
   }
-  .details .details--sub {
+  .details .details--sub{
     flex-wrap: wrap;
     gap: 1rem;
   }
-  .details .details--daily .daily-box {
+  .details .details--daily .daily-box{
     flex-wrap: wrap;
     justify-content: space-evenly;
   }
-  .details .details--daily .daily-text {
+  .details .details--daily .daily-text{
     margin-left: 1rem;
   }
 }
 
-@media (max-width: 375px) {
-  .details .details--main,
-  .details .details--sub,
-  .details .details--daily,
-  .details .details--daily .daily-box {
+@media (max-width:375px) {
+  .details .details--main,.details .details--sub,.details .details--daily,.details .details--daily .daily-box{
     width: 31rem;
   }
 }
 
-@media (max-width: 320px) {
-  .intro .intro--text {
+@media (max-width:320px) {
+  .intro .intro--text{
     font-size: 1.5rem;
   }
-  .intro .intro--search input {
+  .intro .intro--search input{
     width: 17rem;
   }
-  .details .details--main .main-city {
+  .details .details--main .main-city{
     font-size: 1.9rem;
   }
-  .details .details--main div:nth-child(2) .temp {
+  .details .details--main div:nth-child(2) .temp{
     font-size: 4rem;
   }
-  .details .details--main,
-  .details .details--sub,
-  .details .details--daily,
-  .details .details--daily .daily-box {
+  .details .details--main,.details .details--sub,.details .details--daily,.details .details--daily .daily-box{
     width: 28rem;
   }
-  .details .details--sub {
+  .details .details--sub{
     flex-wrap: wrap;
     gap: 1rem;
   }
-  .details .details--daily .daily-box {
+  .details .details--daily .daily-box{
     flex-wrap: wrap;
     justify-content: space-evenly;
   }
-  .details .details--daily .daily-text {
+  .details .details--daily .daily-text{
     margin-left: 1rem;
   }
 }
