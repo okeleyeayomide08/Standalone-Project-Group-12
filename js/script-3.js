@@ -459,6 +459,7 @@ function getLocationWeather() {
       localStorage.setItem("lastCity", label);
       localStorage.setItem("refreshCount", "0");
       localStorage.setItem("isLocationBased", "true");
+      localStorage.setItem("userAcceptedLocation", "true"); // Mark that user accepted location
     } catch {
       showMessage("Unable to fetch your location weather");
     }
@@ -504,6 +505,7 @@ window.addEventListener("load", () => {
 
   const lastCity = localStorage.getItem("lastCity");
   const isLocationBased = localStorage.getItem("isLocationBased") === "true";
+  const userAcceptedLocation = localStorage.getItem("userAcceptedLocation") === "true";
   let refreshCount = Number(localStorage.getItem("refreshCount") || 0);
 
   // Check if we have a last city and refreshes haven't exceeded limit
@@ -523,8 +525,14 @@ window.addEventListener("load", () => {
     localStorage.removeItem("lastCity");
     localStorage.removeItem("isLocationBased");
     getLocationWeather();
-  } else if (lastCity && refreshCount >= MAX_REFRESH && !isLocationBased) {
-    // Searched location and refresh exceeded - stay on it
+  } else if (lastCity && refreshCount >= MAX_REFRESH && !isLocationBased && userAcceptedLocation) {
+    // Searched location after accepting location, refresh exceeded - go back to geolocation
+    localStorage.removeItem("refreshCount");
+    localStorage.removeItem("lastCity");
+    localStorage.removeItem("isLocationBased");
+    getLocationWeather();
+  } else if (lastCity && refreshCount >= MAX_REFRESH && !isLocationBased && !userAcceptedLocation) {
+    // Searched location without ever accepting location - stay on it
     localStorage.removeItem("refreshCount");
     fetchWeatherByCity(lastCity);
   } else {
