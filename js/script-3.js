@@ -509,23 +509,27 @@ window.addEventListener("load", () => {
     localStorage.getItem("userAcceptedLocation") === "true";
   let refreshCount = Number(localStorage.getItem("refreshCount") || 0);
 
+  console.log("Load event:", {
+    lastCity,
+    isLocationBased,
+    userAcceptedLocation,
+    refreshCount,
+    MAX_REFRESH,
+  });
+
   // Check if we have a last city and refreshes haven't exceeded limit
   if (lastCity && refreshCount < MAX_REFRESH && !isLocationBased) {
     // For searched locations, increment refresh count
     refreshCount++;
     localStorage.setItem("refreshCount", refreshCount);
+    console.log("Reloading searched city, count:", refreshCount);
     fetchWeatherByCity(lastCity);
   } else if (lastCity && refreshCount < MAX_REFRESH && isLocationBased) {
     // For location-based, increment and continue reloading location
     refreshCount++;
     localStorage.setItem("refreshCount", refreshCount);
+    console.log("Reloading location-based, count:", refreshCount);
     fetchWeatherByCity(lastCity);
-  } else if (lastCity && refreshCount >= MAX_REFRESH && isLocationBased) {
-    // Location-based and refresh exceeded - go back to geolocation
-    localStorage.removeItem("refreshCount");
-    localStorage.removeItem("lastCity");
-    localStorage.removeItem("isLocationBased");
-    getLocationWeather();
   } else if (
     lastCity &&
     refreshCount >= MAX_REFRESH &&
@@ -533,6 +537,14 @@ window.addEventListener("load", () => {
     userAcceptedLocation
   ) {
     // Searched location after accepting location, refresh exceeded - go back to geolocation
+    console.log("Going back to geolocation (searched after location accepted)");
+    localStorage.removeItem("refreshCount");
+    localStorage.removeItem("lastCity");
+    localStorage.removeItem("isLocationBased");
+    getLocationWeather();
+  } else if (lastCity && refreshCount >= MAX_REFRESH && isLocationBased) {
+    // Location-based and refresh exceeded - go back to geolocation
+    console.log("Going back to geolocation (location-based exceeded)");
     localStorage.removeItem("refreshCount");
     localStorage.removeItem("lastCity");
     localStorage.removeItem("isLocationBased");
@@ -544,10 +556,12 @@ window.addEventListener("load", () => {
     !userAcceptedLocation
   ) {
     // Searched location without ever accepting location - stay on it
+    console.log("Staying on searched location (no location accepted)");
     localStorage.removeItem("refreshCount");
     fetchWeatherByCity(lastCity);
   } else {
     // No previous city, show location
+    console.log("No last city, showing geolocation");
     localStorage.removeItem("refreshCount");
     getLocationWeather();
   }
